@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My International Pal — Desktop Prototype</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #16233B;
+    --navy-2: #1E304C;
+    --paper: #FBF8F0;
+    --paper-dim: #F0EBDC;
+    --ink: #22293A;
+    --ink-soft: #5B6478;
+    --brass: #A9793C;
+    --brass-light: #E4C793;
+    --teal: #2F5D62;
+    --teal-light: #DCEAE7;
+    --coral: #C1553D;
+    --coral-light: #F5DCD4;
+    --line: rgba(22,35,59,0.10);
+    --shadow: 0 30px 80px rgba(22,35,59,0.35);
+  }
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  body{
+    background: linear-gradient(180deg, #E7E2D4 0%, #D8D2C0 100%);
+    min-height: 100vh;
+    display:flex; align-items:center; justify-content:center;
+    font-family: 'Inter', sans-serif;
+    padding: 40px 20px;
+  }
+  .stage{ display:flex; flex-direction:column; align-items:center; gap:16px; width:100%; }
+  .stage-label{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing: 0.14em;
+    text-transform:uppercase; color: #7A7462;
+  }
+
+  /* ---------- Browser chrome ---------- */
+  .browser{
+    width: min(1240px, 96vw);
+    background: #ECE7DA;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  .browser-bar{
+    display:flex; align-items:center; gap:14px;
+    padding: 12px 16px; background:#E3DDCC; border-bottom:1px solid rgba(22,35,59,0.08);
+  }
+  .dots{ display:flex; gap:6px; }
+  .dots span{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .dots span:nth-child(1){ background:#E0847A; }
+  .dots span:nth-child(2){ background:#E6C173; }
+  .dots span:nth-child(3){ background:#8FB89A; }
+  .address-pill{
+    flex:1; background:#fff; border-radius:8px; padding:6px 14px;
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color: var(--ink-soft);
+    display:flex; align-items:center; gap:8px;
+  }
+  .address-pill svg{ flex-shrink:0; }
+
+  /* ---------- App shell ---------- */
+  .app-shell{
+    display:flex;
+    height: 720px;
+    position: relative;
+  }
+
+  /* Sidebar */
+  .sidebar{
+    width: 250px; flex-shrink:0; background: var(--navy); color: var(--paper);
+    display:flex; flex-direction:column; padding: 22px 16px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; padding: 4px 8px 22px; }
+  .brand .mark{
+    width:30px; height:30px; border-radius:50%; border:2px solid var(--brass-light);
+    display:flex; align-items:center; justify-content:center; transform:rotate(-6deg);
+    font-family:'Fraunces'; font-weight:700; font-size:13px; color: var(--brass-light);
+  }
+  .brand .word{ font-family:'Fraunces'; font-weight:600; font-size:14.5px; line-height:1.15; }
+  .brand .word small{ display:block; font-family:'IBM Plex Mono', monospace; font-size:9px; letter-spacing:0.1em; color: rgba(251,248,240,0.5); text-transform:uppercase; margin-top:1px; }
+
+  .side-nav{ display:flex; flex-direction:column; gap:2px; margin-bottom: 22px; }
+  .side-nav-item{
+    display:flex; align-items:center; gap:11px; padding: 10px 12px; border-radius:10px;
+    background:none; border:none; color: rgba(251,248,240,0.6); cursor:pointer;
+    font-family:'Inter'; font-size:13.5px; font-weight:600; text-align:left; position:relative;
+  }
+  .side-nav-item svg{ width:17px; height:17px; flex-shrink:0; }
+  .side-nav-item.active{ background: rgba(251,248,240,0.08); color: var(--paper); }
+  .side-nav-item.active::before{
+    content:""; position:absolute; left:-16px; top:50%; transform:translateY(-50%);
+    width:3px; height:18px; border-radius:2px; background: var(--brass-light);
+  }
+
+  .sidebar-section-label{
+    font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:0.12em;
+    text-transform:uppercase; color: rgba(251,248,240,0.4); padding: 4px 12px 8px;
+  }
+  .profile-list{ display:flex; flex-direction:column; gap:3px; }
+  .profile-row{
+    display:flex; align-items:center; gap:10px; padding: 8px 10px; border-radius:10px;
+    background:none; border:none; cursor:pointer; color: var(--paper); text-align:left;
+  }
+  .profile-row:hover{ background: rgba(251,248,240,0.06); }
+  .profile-row.active{ background: rgba(169,121,60,0.18); }
+  .profile-row .ring{
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces'; font-weight:600; font-size:11.5px; color:#fff;
+  }
+  .profile-row.active .ring{ box-shadow: 0 0 0 2px var(--navy), 0 0 0 3.5px var(--brass-light); }
+  .profile-row .pname{ font-size:12.5px; font-weight:600; }
+  .profile-row .prel{ font-size:10.5px; color: rgba(251,248,240,0.45); }
+  .profile-row.add{ color: rgba(251,248,240,0.55); }
+  .profile-row.add .ring{ background: rgba(251,248,240,0.08); border:1.5px dashed rgba(251,248,240,0.3); font-size:15px; }
+
+  .sidebar-spacer{ flex:1; }
+  .sidebar-foot{
+    font-size:10.5px; color: rgba(251,248,240,0.35); padding: 10px 10px 0;
+    border-top:1px solid rgba(251,248,240,0.08); line-height:1.5;
+  }
+
+  /* Main */
+  .main{ flex:1; display:flex; flex-direction:column; background: var(--paper); min-width:0; }
+  .main-topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    padding: 22px 30px 14px; border-bottom: 1px solid var(--line); flex-shrink:0;
+  }
+  .topbar-left{ display:flex; align-items:flex-start; gap:12px; min-width:0; }
+  .topbar-left h1{ font-family:'Fraunces'; font-weight:600; font-size:22px; color: var(--ink); }
+  .topbar-left .sub{ font-size:12.5px; color: var(--ink-soft); margin-top:2px; }
+  .viewing-pill{
+    display:inline-flex; align-items:center; gap:6px; background: var(--teal-light); color:var(--teal);
+    font-size:11.5px; font-weight:600; padding:5px 11px; border-radius:999px; margin-top:6px;
+  }
+  .topbar-right{ display:flex; align-items:center; gap:10px; flex-shrink:0; }
+
+  .search-box{
+    background:#fff; border:1px solid var(--line); border-radius:10px;
+    padding: 9px 13px; display:flex; align-items:center; gap:8px; width:230px;
+  }
+  .search-box input{ border:none; outline:none; font-family:'Inter'; font-size:13px; flex:1; color:var(--ink); min-width:0; }
+  .search-box input::placeholder{ color:#A6A196; }
+
+  .primary-btn{
+    background: var(--brass); color:#fff; border:none; border-radius:10px;
+    padding: 9px 16px; font-family:'Inter'; font-weight:600; font-size:13px; cursor:pointer;
+    display:flex; align-items:center; gap:7px; white-space:nowrap;
+  }
+  .ghost-btn{
+    background: none; border:1px solid var(--line); color:var(--ink); border-radius:9px;
+    padding: 7px 12px; font-family:'Inter'; font-weight:600; font-size:12px; cursor:pointer;
+  }
+
+  /* Mobile hamburger — hidden on desktop */
+  .menu-btn{
+    display:none; align-items:center; justify-content:center;
+    width:36px; height:36px; border-radius:9px; border:1px solid var(--line);
+    background:#fff; cursor:pointer; flex-shrink:0; color:var(--ink);
+  }
+
+  .main-content{ flex:1; overflow-y:auto; padding: 24px 30px 40px; -webkit-overflow-scrolling:touch; }
+  .section-title{
+    font-family:'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-soft); margin: 0 0 12px;
+  }
+
+  /* ---- Home dashboard ---- */
+  .home-grid{ display:grid; grid-template-columns: 1.6fr 1fr; gap:22px; align-items:start; }
+  .quick-actions-row{ display:flex; gap:14px; margin-bottom:26px; }
+  .quick-card{
+    flex:1; background: var(--navy); color: var(--paper); border:none; border-radius: 16px;
+    padding: 20px; text-align:left; cursor:pointer; display:flex; flex-direction:column; gap:12px;
+  }
+  .quick-card.alt{ background: var(--teal); }
+  .quick-card .qtitle{ font-family:'Fraunces'; font-weight:600; font-size:15px; }
+  .quick-card .qsub{ font-size:11.5px; color: rgba(251,248,240,0.6); }
+
+  .card{
+    background: #fff; border: 1px solid var(--line); border-radius: 14px;
+    padding: 15px 17px; margin-bottom: 10px; display:flex; align-items:center; gap: 13px;
+  }
+  .card .icon-badge{
+    width: 38px; height:38px; border-radius: 11px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .card .body{ flex:1; min-width:0; }
+  .card .title-row{ display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
+  .card .title{ font-weight:600; font-size:14px; color:var(--ink); }
+  .card .meta{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft); margin-top:3px; }
+  .card .sub{ font-size:12px; color: var(--ink-soft); margin-top:2px; }
+
+  .stamp{
+    font-family:'Fraunces', serif; font-weight: 600; font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 5px 10px 4px; border-radius: 999px;
+    border: 1.5px solid currentColor; display:inline-block; transform: rotate(-4deg); white-space:nowrap;
+  }
+  .stamp.valid{ color: var(--teal); background: var(--teal-light); }
+  .stamp.expiring{ color: var(--brass); background: #FBF1E1; }
+  .stamp.expired{ color: var(--coral); background: var(--coral-light); }
+
+  .priority-dot{
+    width:9px; height:9px; border-radius:50%; flex-shrink:0;
+    border: 2px solid #fff; box-shadow: 0 0 0 1.5px currentColor;
+  }
+  .priority-dot.high{ background: var(--coral); color: var(--coral); }
+  .priority-dot.med{ background: var(--brass); color: var(--brass); }
+  .priority-dot.low{ background: var(--teal); color: var(--teal); }
+
+  .side-widget{
+    background: #fff; border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:16px;
+  }
+  .side-widget h3{ font-family:'Fraunces'; font-size:14.5px; font-weight:600; color:var(--ink); margin-bottom:4px; }
+  .family-glance-row{
+    display:flex; align-items:center; gap:10px; padding: 9px 0; border-top:1px solid var(--line);
+  }
+  .family-glance-row:first-of-type{ border-top:none; }
+  .family-glance-row .ring{
+    width:30px; height:30px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces'; font-weight:600; font-size:12px; color:#fff;
+  }
+  .family-glance-row .fgname{ font-size:13px; font-weight:600; color:var(--ink); }
+  .family-glance-row .fgrel{ font-size:10.5px; color:var(--ink-soft); }
+  .family-glance-row .fgstamp{ margin-left:auto; }
+
+  /* ---- Documents table ---- */
+  .table-toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:12px; }
+  .doc-table-wrap{ width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:14px; }
+  .doc-table{ width:100%; min-width:520px; border-collapse:separate; border-spacing:0; background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .doc-table th{
+    text-align:left; font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:0.08em;
+    text-transform:uppercase; color: var(--ink-soft); background: var(--paper-dim);
+    padding: 12px 18px; font-weight:600;
+  }
+  .doc-table td{ padding: 14px 18px; border-top:1px solid var(--line); font-size:13.5px; color:var(--ink); }
+  .doc-table tr:first-child td{ border-top:none; }
+  .doc-name{ display:flex; align-items:center; gap:10px; font-weight:600; }
+  .doc-name .icon-badge{ width:32px; height:32px; border-radius:9px; }
+  .doc-table .meta-cell{ font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); }
+
+  /* ---- Notifications ---- */
+  .notif-row{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:15px 17px; margin-bottom:9px; display:flex; align-items:center; gap:13px; }
+
+  /* ---- Legal grid ---- */
+  .legal-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
+  .legal-card{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:10px; }
+  .legal-card .avatar{
+    width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces'; font-weight:600; font-size:15px; color:#fff;
+  }
+  .legal-card .lname{ font-weight:600; font-size:14.5px; color:var(--ink); }
+  .legal-card .lspec{ font-size:12px; color:var(--ink-soft); }
+  .legal-card .rating{ font-family:'IBM Plex Mono', monospace; font-size:12px; color: var(--brass); }
+  .legal-card .contact-btn{
+    margin-top:4px; background: var(--navy); color:#fff; border:none; border-radius:9px;
+    padding: 9px 12px; font-size:12.5px; font-weight:600; font-family:'Inter'; cursor:pointer;
+  }
+
+  /* ---- Settings ---- */
+  .settings-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:24px; align-items:start; }
+  .profile-card{
+    background: var(--navy); color:var(--paper); border-radius:16px; padding:18px; margin-bottom:16px;
+    display:flex; align-items:center; gap:14px;
+  }
+  .avatar{
+    width:46px; height:46px; border-radius:50%; background: var(--brass); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces'; font-weight:600; font-size:17px; flex-shrink:0;
+  }
+  .profile-card .name{ font-family:'Fraunces'; font-weight:600; font-size:15.5px; }
+  .profile-card .email{ font-size:11.5px; color:rgba(251,248,240,0.6); margin-top:2px; }
+
+  .family-row{
+    background:#fff; border:1px solid var(--line); border-radius:13px;
+    padding: 11px 14px; margin-bottom: 8px; display:flex; align-items:center; gap:12px;
+  }
+  .family-row .ring{
+    width:36px; height:36px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces'; font-weight:600; font-size:13px; color:#fff;
+  }
+  .family-row .fname{ font-weight:600; font-size:13px; color:var(--ink); }
+  .family-row .frel{ font-size:11px; color:var(--ink-soft); }
+  .active-tag{
+    font-family:'IBM Plex Mono', monospace; font-size:9px; color: var(--teal); background: var(--teal-light);
+    padding:3px 8px; border-radius:999px; letter-spacing:0.05em; text-transform:uppercase; margin-right:8px;
+  }
+
+  .settings-row{
+    background:#fff; border:1px solid var(--line); border-radius:13px;
+    padding: 13px 15px; margin-bottom: 8px;
+    display:flex; align-items:center; justify-content:space-between; cursor:pointer;
+  }
+  .settings-row .label{ font-size:13.5px; font-weight:600; color:var(--ink); }
+  .settings-row .value{ font-size:12px; color:var(--ink-soft); }
+
+  /* ---- Access & Sharing side drawer ---- */
+  .drawer-backdrop{
+    position:absolute; inset:0; background: rgba(22,35,59,0.35);
+    display:none; z-index:40;
+  }
+  .drawer-backdrop.open{ display:block; }
+  .drawer{
+    position:absolute; top:0; right:-420px; width:400px; height:100%;
+    background: var(--paper); box-shadow: -12px 0 40px rgba(22,35,59,0.25);
+    z-index:50; transition: right .22s ease; display:flex; flex-direction:column;
+  }
+  .drawer.open{ right:0; }
+  .drawer-header{
+    background: var(--navy); color:var(--paper); padding: 22px 22px 16px;
+    display:flex; align-items:center; gap:12px; flex-shrink:0;
+  }
+  .drawer-header .eyebrow{ font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color: var(--brass-light); }
+  .drawer-header h2{ font-family:'Fraunces'; font-weight:600; font-size:18px; margin-top:2px; }
+  .close-drawer-btn{
+    margin-left:auto; background: rgba(251,248,240,0.1); border:none; border-radius:9px;
+    width:30px; height:30px; display:flex; align-items:center; justify-content:center;
+    color:var(--paper); cursor:pointer; flex-shrink:0;
+  }
+  .drawer-content{ flex:1; overflow-y:auto; padding: 20px 22px 30px; -webkit-overflow-scrolling:touch; }
+
+  .owner-card{
+    background: #fff; border: 1.5px solid var(--brass-light); border-radius: 14px;
+    padding: 13px 15px; margin-bottom: 8px; display:flex; align-items:center; gap:12px;
+  }
+  .owner-card .ring{
+    width:40px; height:40px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces'; font-weight:600; font-size:14.5px; color:#fff;
+  }
+  .owner-card .oname{ font-weight:600; font-size:13.5px; color:var(--ink); }
+  .owner-card .orole{ font-size:11px; color:var(--ink-soft); margin-top:1px; }
+
+  .guardian-banner{
+    background: var(--teal-light); border-radius:13px; padding:13px 14px; margin-bottom:18px;
+    font-size:12px; color: var(--ink); line-height:1.5;
+  }
+  .guardian-banner strong{ color: var(--teal); }
+  .transfer-btn{
+    margin-top:10px; background: var(--teal); color:#fff; border:none; border-radius:9px;
+    padding:8px 13px; font-family:'Inter'; font-weight:600; font-size:12px; cursor:pointer;
+  }
+
+  .access-row{
+    background:#fff; border:1px solid var(--line); border-radius:13px;
+    padding: 10px 13px; margin-bottom: 8px; display:flex; align-items:center; gap:11px;
+  }
+  .access-row .ring{
+    width:34px; height:34px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces'; font-weight:600; font-size:12.5px; color:#fff;
+  }
+  .access-row .aname{ font-weight:600; font-size:13px; color:var(--ink); }
+  .access-row .arole{ font-size:10.5px; color:var(--ink-soft); margin-top:1px; }
+  .revoke-btn{
+    margin-left:auto; background:none; border: 1px solid var(--coral); color: var(--coral);
+    border-radius:8px; padding:5px 9px; font-size:11px; font-weight:600; font-family:'Inter'; cursor:pointer;
+    flex-shrink:0;
+  }
+  .empty-access{
+    text-align:center; padding: 16px 10px; color: var(--ink-soft); font-size:12px;
+    background: var(--paper-dim); border-radius:13px; margin-bottom:10px;
+  }
+  .privacy-note{
+    font-size:11.5px; color: var(--ink-soft); background: var(--paper-dim);
+    border-radius:10px; padding:10px 12px; margin-top:16px; line-height:1.45;
+  }
+  .add-btn{
+    background: var(--brass); color: #fff; border:none; border-radius: 12px;
+    padding: 12px 14px; font-family:'Inter'; font-weight:600; font-size: 13px;
+    width:100%; margin-bottom: 6px; cursor:pointer;
+  }
+
+  /* ---- Modals (add family / invite / transfer) ---- */
+  .modal-overlay{
+    position:absolute; inset:0; background: rgba(22,35,59,0.5);
+    display:none; align-items:center; justify-content:center; z-index: 60;
+    padding: 20px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal-sheet{
+    background: var(--paper); width:400px; max-width:100%; border-radius: 18px;
+    padding: 24px; animation: pop .16s ease-out; max-height:88vh; overflow-y:auto;
+  }
+  @keyframes pop{ from{ transform: scale(.97); opacity:0; } to{ transform:none; opacity:1; } }
+  .modal-sheet h2{ font-family:'Fraunces'; font-size:19px; font-weight:600; color:var(--ink); margin-bottom:4px; }
+  .modal-sheet .modal-sub{ font-size:12.5px; color:var(--ink-soft); margin-bottom:16px; }
+  .field{ margin-bottom:14px; }
+  .field label{
+    display:block; font-size:11px; font-weight:600; text-transform:uppercase;
+    letter-spacing:0.05em; color: var(--ink-soft); margin-bottom:6px;
+  }
+  .field input, .field select{
+    width:100%; border:1px solid var(--line); border-radius:9px; padding:10px 12px;
+    font-family:'Inter'; font-size:13.5px; color:var(--ink); background:#fff;
+  }
+  .modal-actions{ display:flex; gap:10px; margin-top:6px; }
+  .modal-actions button{
+    flex:1; border:none; border-radius:11px; padding:11px; font-family:'Inter';
+    font-weight:600; font-size:13.5px; cursor:pointer;
+  }
+  .btn-cancel{ background: var(--paper-dim); color: var(--ink); }
+  .btn-save{ background: var(--brass); color:#fff; }
+  .modal-note{
+    font-size:11px; color: var(--ink-soft); background:var(--paper-dim);
+    border-radius:9px; padding:10px 12px; margin-top:14px; line-height:1.4;
+  }
+
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  /* =========================================================
+     MOBILE RESPONSIVE
+     ========================================================= */
+  @media (max-width: 900px){
+    body{ padding:0; }
+    .stage{ gap:0; }
+    .stage-label{ display:none; }
+
+    .browser{ width:100vw; max-width:100vw; border-radius:0; box-shadow:none; }
+    .browser-bar{ padding:8px 12px; gap:10px; }
+    .address-pill{ font-size:10.5px; padding:5px 10px; }
+
+    .app-shell{
+      height:100vh; height:100dvh;
+      overflow:hidden;
+    }
+
+    /* Sidebar becomes an off-canvas drawer */
+    .sidebar{
+      position:absolute; top:0; left:0; height:100%;
+      width:80vw; max-width:290px;
+      transform: translateX(-100%);
+      transition: transform .22s ease;
+      z-index:80;
+      box-shadow: 20px 0 50px rgba(0,0,0,0.3);
+    }
+    .sidebar.open{ transform: translateX(0); }
+
+    .sidebar-scrim{
+      display:none;
+      position:absolute; inset:0; background: rgba(22,35,59,0.42);
+      z-index:70;
+    }
+    .sidebar-scrim.open{ display:block; }
+
+    .menu-btn{ display:flex; }
+
+    .main{ width:100%; }
+    .main-topbar{
+      padding: 14px 16px 12px;
+      flex-wrap:wrap;
+      row-gap:10px;
+    }
+    .topbar-left{ gap:10px; }
+    .topbar-left h1{ font-size:17px; line-height:1.2; }
+    .topbar-left .sub{ font-size:11px; }
+    .topbar-right{ width:100%; flex-wrap:wrap; }
+    .search-box{ width:100%; }
+    .primary-btn{ width:100%; justify-content:center; }
+
+    .main-content{ padding: 16px 14px 30px; }
+
+    .quick-actions-row{ flex-direction:column; margin-bottom:20px; }
+    .home-grid{ grid-template-columns: 1fr; gap:18px; }
+
+    .legal-grid{ grid-template-columns: 1fr; }
+    .settings-grid{ grid-template-columns: 1fr; gap:20px; }
+
+    .doc-table{ min-width:480px; }
+
+    .drawer{ width:100%; right:-100%; }
+
+    .modal-sheet{ padding:20px; }
+  }
+
+  @media (max-width: 420px){
+    .doc-table{ min-width:420px; }
+    .doc-table th, .doc-table td{ padding: 11px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="stage-label">My International Pal — desktop · click sidebar or profiles to explore</div>
+
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="address-pill">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        app.myinternationalpal.com
+      </div>
+    </div>
+
+    <div class="app-shell">
+
+      <!-- ============ MOBILE SIDEBAR SCRIM ============ -->
+      <div class="sidebar-scrim" id="sidebar-scrim" onclick="closeSidebar()"></div>
+
+      <!-- ============ SIDEBAR ============ -->
+      <div class="sidebar" id="sidebar">
+        <div class="brand">
+          <div class="mark">P</div>
+          <div class="word">My International Pal<small>Immigration, organized</small></div>
+        </div>
+
+        <div class="side-nav" id="side-nav">
+          <button class="side-nav-item active" data-panel="home" onclick="go('home')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></svg>
+            Home
+          </button>
+          <button class="side-nav-item" data-panel="documents" onclick="go('documents')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M9 13h6M9 17h6"/></svg>
+            Documents
+          </button>
+          <button class="side-nav-item" data-panel="notifications" onclick="go('notifications')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            Notifications
+          </button>
+          <button class="side-nav-item" data-panel="legal" onclick="go('legal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8l-3 6a4 4 0 0 0 6 0zM19 8l-3 6a4 4 0 0 0 6 0zM5 8h14M9 3h6"/></svg>
+            Legal Help
+          </button>
+          <button class="side-nav-item" data-panel="settings" onclick="go('settings')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>
+            Settings
+          </button>
+        </div>
+
+        <div class="sidebar-section-label">Managing</div>
+        <div class="profile-list" id="profile-list"></div>
+
+        <div class="sidebar-spacer"></div>
+        <div class="sidebar-foot">Signed in as Paul Demarco</div>
+      </div>
+
+      <!-- ============ MAIN ============ -->
+      <div class="main">
+        <div class="main-topbar">
+          <div class="topbar-left">
+            <button class="menu-btn" onclick="openSidebar()" aria-label="Open menu">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <div>
+              <h1 id="topbar-title">Welcome, Paul</h1>
+              <div class="sub" id="topbar-sub">Everything's on track for your renewal this month.</div>
+              <div id="viewing-pill-slot"></div>
+            </div>
+          </div>
+          <div class="topbar-right" id="topbar-actions"></div>
+        </div>
+
+        <div class="main-content">
+
+          <!-- HOME -->
+          <div class="panel active" id="panel-home">
+            <div class="quick-actions-row">
+              <button class="quick-card" onclick="go('documents')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16m8-8H4"/></svg>
+                <div class="qtitle">Upload document</div>
+                <div class="qsub">Add a new file to this account</div>
+              </button>
+              <button class="quick-card alt" onclick="go('notifications')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h8l-1 8 10-12h-8l1-8z"/></svg>
+                <div class="qtitle">View policy updates</div>
+                <div class="qsub">See what's changed recently</div>
+              </button>
+            </div>
+
+            <div class="home-grid">
+              <div>
+                <div class="section-title">Recent updates</div>
+                <div id="home-updates"></div>
+              </div>
+              <div>
+                <div class="side-widget">
+                  <h3>Frequently used</h3>
+                  <div id="home-frequent" style="margin-top:10px;"></div>
+                </div>
+                <div class="side-widget" id="family-glance-widget">
+                  <h3>Family at a glance</h3>
+                  <div id="family-glance"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DOCUMENTS -->
+          <div class="panel" id="panel-documents">
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>Document</th><th>Status</th><th>Details</th><th></th></tr>
+                </thead>
+                <tbody id="documents-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- NOTIFICATIONS -->
+          <div class="panel" id="panel-notifications">
+            <div id="notifications-list"></div>
+          </div>
+
+          <!-- LEGAL HELP -->
+          <div class="panel" id="panel-legal">
+            <div class="legal-grid">
+              <div class="legal-card">
+                <div class="avatar" style="background:var(--brass);">RM</div>
+                <div><div class="lname">Rosa Marín, Esq.</div><div class="lspec">Immigration Law · Chicago, IL</div></div>
+                <div class="rating">★ 4.9</div>
+                <button class="contact-btn">Contact</button>
+              </div>
+              <div class="legal-card">
+                <div class="avatar" style="background:var(--teal);">KO</div>
+                <div><div class="lname">Kenji Oyelaran</div><div class="lspec">Visa &amp; Sponsorship · Remote</div></div>
+                <div class="rating">★ 4.8</div>
+                <button class="contact-btn">Contact</button>
+              </div>
+              <div class="legal-card">
+                <div class="avatar" style="background:var(--coral);">DP</div>
+                <div><div class="lname">Devika Patel &amp; Assoc.</div><div class="lspec">Family Immigration · Fresno, CA</div></div>
+                <div class="rating">★ 4.7</div>
+                <button class="contact-btn">Contact</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SETTINGS -->
+          <div class="panel" id="panel-settings">
+            <div class="settings-grid">
+              <div>
+                <div class="profile-card">
+                  <div class="avatar" id="settings-avatar">P</div>
+                  <div>
+                    <div class="name" id="settings-name">Paul Demarco</div>
+                    <div class="email" id="settings-email">paul.demarco@email.com</div>
+                  </div>
+                </div>
+
+                <div class="section-title">Family &amp; managed accounts</div>
+                <div id="family-list"></div>
+                <button class="add-btn" onclick="openModal()">+ Add a family member</button>
+
+                <div class="section-title" style="margin-top:20px;">Access &amp; sharing</div>
+                <div class="settings-row" onclick="openAccess('paul')">
+                  <span class="label">Manage who can see your account</span>
+                  <span class="value">›</span>
+                </div>
+              </div>
+
+              <div>
+                <div class="section-title">Preferences</div>
+                <div class="settings-row"><span class="label">Language</span><span class="value">English &nbsp;›</span></div>
+                <div class="settings-row"><span class="label">Notifications</span><span class="value">On &nbsp;›</span></div>
+
+                <div class="section-title" style="margin-top:20px;">Account</div>
+                <div class="settings-row"><span class="label">Edit profile</span><span class="value">›</span></div>
+                <div class="settings-row"><span class="label">Privacy &amp; security</span><span class="value">›</span></div>
+
+                <div class="section-title" style="margin-top:20px;">Support</div>
+                <div class="settings-row"><span class="label">Help center</span><span class="value">›</span></div>
+                <div class="settings-row"><span class="label">Contact support</span><span class="value">›</span></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ============ ACCESS & SHARING DRAWER ============ -->
+      <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeAccess()"></div>
+      <div class="drawer" id="access-drawer">
+        <div class="drawer-header">
+          <div>
+            <div class="eyebrow">Access &amp; Sharing</div>
+            <h2 id="access-title">Paul's account</h2>
+          </div>
+          <button class="close-drawer-btn" onclick="closeAccess()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
+        <div class="drawer-content">
+          <div class="section-title" style="margin-top:0;">Account holder</div>
+          <div id="access-owner"></div>
+          <div id="access-guardian-banner"></div>
+
+          <div class="section-title">Can manage (delegates)</div>
+          <div id="access-delegates"></div>
+
+          <div class="section-title">Can view only</div>
+          <div id="access-viewers"></div>
+
+          <button class="add-btn" onclick="openInviteModal()">+ Invite someone</button>
+
+          <div class="privacy-note" id="access-privacy-note"></div>
+        </div>
+      </div>
+
+      <!-- ============ MODAL: add family member ============ -->
+      <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-sheet">
+          <h2>Add a family member</h2>
+          <div class="modal-sub">Create a profile to manage someone else's documents and status.</div>
+          <div class="field">
+            <label>Full name</label>
+            <input type="text" id="new-name" placeholder="e.g. Amara Demarco">
+          </div>
+          <div class="field">
+            <label>Relationship to you</label>
+            <select id="new-relation">
+              <option>Child</option>
+              <option>Parent</option>
+              <option>Grandparent</option>
+              <option>Spouse</option>
+              <option>Other family member</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-save" onclick="saveNewProfile()">Add profile</button>
+          </div>
+          <div class="modal-note">You'll manage this person's documents and alerts. They can be given their own login later if they want direct access.</div>
+        </div>
+      </div>
+
+      <!-- ============ MODAL: invite to access ============ -->
+      <div class="modal-overlay" id="invite-overlay">
+        <div class="modal-sheet">
+          <h2>Invite someone</h2>
+          <div class="modal-sub" id="invite-sub">Give someone access to this account.</div>
+          <div class="field">
+            <label>Full name</label>
+            <input type="text" id="invite-name" placeholder="e.g. Jordan Lee">
+          </div>
+          <div class="field">
+            <label>Access level</label>
+            <select id="invite-role">
+              <option value="delegate">Delegate — can manage documents &amp; alerts</option>
+              <option value="viewer">Viewer — can see, not change, anything</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeInviteModal()">Cancel</button>
+            <button class="btn-save" onclick="saveInvite()">Send invite</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ MODAL: transfer ownership confirm ============ -->
+      <div class="modal-overlay" id="transfer-overlay">
+        <div class="modal-sheet">
+          <h2>Transfer ownership?</h2>
+          <div class="modal-sub" id="transfer-sub">This account will become fully controlled by its holder.</div>
+          <div class="modal-note">Paul will lose automatic access. The new owner decides from scratch who, if anyone, can see or manage this account — including whether to invite Paul back.</div>
+          <div class="modal-actions" style="margin-top:14px;">
+            <button class="btn-cancel" onclick="closeTransferModal()">Cancel</button>
+            <button class="btn-save" style="background:var(--teal);" onclick="confirmTransfer()">Transfer ownership</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- DATA ----------
+  const colors = ['var(--brass)', 'var(--teal)', 'var(--coral)', '#6B7A9A', '#8C6E8F'];
+
+  const PROFILES = {
+    paul: {
+      name: "Paul Demarco", first: "Paul", relation: "You", initial: "P", color: 'var(--brass)',
+      email: "paul.demarco@email.com",
+      access: { isMinor:false, ownerName:"Paul Demarco", delegates: [], viewers: [] },
+      subline: "Everything's on track for your renewal this month.",
+      updates: [
+        { icon:'alert', color:'coral', title:"Visa renewal due in 30 days", sub:"Start your renewal now to avoid delays" },
+        { icon:'doc', color:'teal', title:"Policy update: work permits", sub:"New processing times published today" }
+      ],
+      frequent: { title:"Passport", status:"valid", meta:"Expires 03 / 2031" },
+      documents: [
+        { title:"Passport", status:"valid", meta:"Expires 03 / 2031" },
+        { title:"Work visa (H-1B)", status:"expiring", meta:"Expires 08 / 2026" },
+        { title:"I-94 Arrival Record", status:"expired", meta:"Expired 11 / 2025" },
+        { title:"Employment letter", status:"valid", meta:"Added 02 / 2026" }
+      ],
+      notifications: [
+        { p:'high', title:"Visa renewal due in 30 days", sub:"Work visa (H-1B) · Action needed" },
+        { p:'high', title:"I-94 record has expired", sub:"Upload an updated copy when available" },
+        { p:'med', title:"Processing times updated", sub:"USCIS · Work permit category" },
+        { p:'low', title:"Document reviewed successfully", sub:"Employment letter · No action needed" }
+      ]
+    },
+    maya: {
+      name: "Maya Demarco", first: "Maya", relation: "Daughter", initial: "M", color: 'var(--teal)',
+      email: "(managed by Paul)",
+      access: {
+        isMinor: true, ownerName: "Maya Demarco",
+        delegates: [{ id:'paul', name:"Paul Demarco", initial:"P", color:'var(--brass)', relation:"Parent / guardian" }],
+        viewers: []
+      },
+      subline: "One document needs attention for Maya.",
+      updates: [
+        { icon:'alert', color:'coral', title:"School enrollment letter needed", sub:"Required for dependent visa renewal" }
+      ],
+      frequent: { title:"Birth certificate", status:"valid", meta:"On file" },
+      documents: [
+        { title:"Birth certificate", status:"valid", meta:"On file" },
+        { title:"Dependent visa", status:"expiring", meta:"Expires 09 / 2026" },
+        { title:"School enrollment letter", status:"expired", meta:"Needs updating" }
+      ],
+      notifications: [
+        { p:'high', title:"School enrollment letter needed", sub:"Dependent visa · Action needed" },
+        { p:'low', title:"Dependent visa reviewed", sub:"No issues found" }
+      ]
+    },
+    robert: {
+      name: "Robert Demarco", first: "Robert", relation: "Father", initial: "R", color: 'var(--coral)',
+      email: "(managed by Paul)",
+      access: {
+        isMinor: false, ownerName: "Robert Demarco",
+        delegates: [{ id:'paul', name:"Paul Demarco", initial:"P", color:'var(--brass)', relation:"Son — invited by Robert" }],
+        viewers: []
+      },
+      subline: "Robert's green card renewal is on track.",
+      updates: [
+        { icon:'doc', color:'teal', title:"Green card renewal received", sub:"Application confirmed by USCIS" }
+      ],
+      frequent: { title:"Green card", status:"expiring", meta:"Expires 05 / 2026" },
+      documents: [
+        { title:"Green card", status:"expiring", meta:"Expires 05 / 2026" },
+        { title:"Medical exam record", status:"valid", meta:"Completed 01 / 2026" }
+      ],
+      notifications: [
+        { p:'med', title:"Green card renewal received", sub:"Application confirmed by USCIS" },
+        { p:'low', title:"Medical exam on file", sub:"No action needed" }
+      ]
+    }
+  };
+  let profileOrder = ['paul', 'maya', 'robert'];
+  let current = 'paul';
+  let currentPanel = 'home';
+
+  function initials(name){ return name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+
+  function iconSvg(kind, color){
+    if(kind === 'alert'){
+      return `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--${color})" stroke-width="2"><path d="M12 8v5m0 4h.01M10.3 3.9 2.3 18a1 1 0 0 0 .9 1.5h17.6a1 1 0 0 0 .9-1.5l-8-14.1a1 1 0 0 0-1.7 0Z"/></svg>`;
+    }
+    return `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--${color})" stroke-width="2"><path d="M4 12h16M4 6h16M4 18h10"/></svg>`;
+  }
+  function docIconBadge(size){
+    const s = size || 18;
+    return `<div class="icon-badge" style="background:var(--paper-dim);">
+      <svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/></svg>
+    </div>`;
+  }
+  function stampHtml(status){
+    const label = status === 'valid' ? 'Valid' : status === 'expiring' ? 'Expiring' : 'Expired';
+    return `<span class="stamp ${status}">${label}</span>`;
+  }
+
+  function renderProfileList(){
+    const list = document.getElementById('profile-list');
+    let html = '';
+    profileOrder.forEach(key => {
+      const p = PROFILES[key];
+      html += `
+        <button class="profile-row ${key===current?'active':''}" onclick="switchProfile('${key}')">
+          <div class="ring" style="background:${p.color};">${p.initial}</div>
+          <div><div class="pname">${p.first}</div><div class="prel">${p.relation}</div></div>
+        </button>`;
+    });
+    html += `
+      <button class="profile-row add" onclick="openModal()">
+        <div class="ring">+</div>
+        <div class="pname">Add family member</div>
+      </button>`;
+    list.innerHTML = html;
+  }
+
+  function renderTopbar(){
+    const p = PROFILES[current];
+    const titles = { home: current==='paul' ? `Welcome, Paul` : `Managing ${p.first}'s account`,
+      documents: current==='paul' ? 'My Documents' : `${p.first}'s Documents`,
+      notifications: current==='paul' ? 'Notifications' : `${p.first}'s Notifications`,
+      legal: 'Find Legal Help', settings: 'Settings' };
+    document.getElementById('topbar-title').textContent = titles[currentPanel];
+    document.getElementById('topbar-sub').textContent =
+      currentPanel === 'home' ? p.subline :
+      currentPanel === 'legal' ? 'Vetted immigration attorneys near you' :
+      currentPanel === 'settings' ? 'Your account, family, and preferences' : '';
+
+    const pillSlot = document.getElementById('viewing-pill-slot');
+    pillSlot.innerHTML = (current !== 'paul' && currentPanel !== 'settings' && currentPanel !== 'legal')
+      ? `<div class="viewing-pill">
+           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+           Viewing ${p.first}'s account · ${p.relation}
+         </div>` : '';
+
+    const actions = document.getElementById('topbar-actions');
+    if(currentPanel === 'documents'){
+      actions.innerHTML = `
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A6A196" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input placeholder="Search documents">
+        </div>
+        <button class="primary-btn">+ Add document</button>`;
+    } else if(currentPanel === 'legal'){
+      actions.innerHTML = `
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A6A196" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input placeholder="Search by name or city">
+        </div>`;
+    } else {
+      actions.innerHTML = '';
+    }
+  }
+
+  function render(){
+    const p = PROFILES[current];
+    renderProfileList();
+    renderTopbar();
+
+    // Home
+    document.getElementById('home-updates').innerHTML = p.updates.map(u => `
+      <div class="card">
+        <div class="icon-badge" style="background:var(--${u.color}-light);">${iconSvg(u.icon, u.color)}</div>
+        <div class="body">
+          <div class="title-row"><span class="title">${u.title}</span></div>
+          <div class="sub">${u.sub}</div>
+        </div>
+      </div>`).join('');
+
+    document.getElementById('home-frequent').innerHTML = `
+      <div class="card" style="margin-bottom:0; cursor:pointer;" onclick="go('documents')">
+        ${docIconBadge()}
+        <div class="body">
+          <div class="title-row"><span class="title">${p.frequent.title}</span>${stampHtml(p.frequent.status)}</div>
+          <div class="meta">${p.frequent.meta}</div>
+        </div>
+      </div>`;
+
+    document.getElementById('family-glance').innerHTML = profileOrder.map(key => {
+      const fp = PROFILES[key];
+      return `
+        <div class="family-glance-row">
+          <div class="ring" style="background:${fp.color};">${fp.initial}</div>
+          <div><div class="fgname">${fp.first}</div><div class="fgrel">${key==='paul' ? 'You' : fp.relation}</div></div>
+          <div class="fgstamp">${stampHtml(fp.frequent.status)}</div>
+        </div>`;
+    }).join('');
+
+    // Documents
+    document.getElementById('documents-tbody').innerHTML = p.documents.length ? p.documents.map(d => `
+      <tr>
+        <td><div class="doc-name">${docIconBadge(16)} ${d.title}</div></td>
+        <td>${stampHtml(d.status)}</td>
+        <td class="meta-cell">${d.meta}</td>
+        <td><button class="ghost-btn">View</button></td>
+      </tr>`).join('') : `<tr><td colspan="4" style="text-align:center; color:var(--ink-soft); padding:24px;">No documents yet</td></tr>`;
+
+    // Notifications
+    document.getElementById('notifications-list').innerHTML = p.notifications.map(n => `
+      <div class="notif-row">
+        <div class="priority-dot ${n.p}"></div>
+        <div class="body">
+          <div class="title-row"><span class="title">${n.title}</span></div>
+          <div class="sub">${n.sub}</div>
+        </div>
+      </div>`).join('');
+
+    // Settings
+    const owner = PROFILES.paul;
+    document.getElementById('settings-avatar').textContent = owner.initial;
+    document.getElementById('settings-name').textContent = owner.name;
+    document.getElementById('settings-email').textContent = owner.email;
+
+    document.getElementById('family-list').innerHTML = profileOrder.map(key => {
+      const fp = PROFILES[key];
+      return `
+        <div class="family-row">
+          <div style="display:flex; align-items:center; gap:12px; flex:1; cursor:pointer;" onclick="switchProfile('${key}')">
+            <div class="ring" style="background:${fp.color};">${fp.initial}</div>
+            <div><div class="fname">${fp.name}</div><div class="frel">${key === 'paul' ? 'Account owner' : fp.relation}</div></div>
+          </div>
+          ${key === current ? '<span class="active-tag">Viewing</span>' : ''}
+          <button class="ghost-btn" onclick="event.stopPropagation(); openAccess('${key}')">Access</button>
+        </div>`;
+    }).join('');
+  }
+
+  function switchProfile(key){
+    current = key;
+    render();
+    closeSidebar();
+  }
+
+  function go(panel){
+    currentPanel = panel;
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + panel).classList.add('active');
+    document.querySelectorAll('.side-nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelector('.side-nav-item[data-panel="' + panel + '"]').classList.add('active');
+    renderTopbar();
+    closeSidebar();
+  }
+
+  // ---------- Mobile sidebar drawer ----------
+  function openSidebar(){
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebar-scrim').classList.add('open');
+  }
+  function closeSidebar(){
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-scrim').classList.remove('open');
+  }
+
+  // ---------- Add family modal ----------
+  function openModal(){ document.getElementById('modal-overlay').classList.add('open'); closeSidebar(); }
+  function closeModal(){
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.getElementById('new-name').value = '';
+  }
+  function saveNewProfile(){
+    const name = document.getElementById('new-name').value.trim();
+    const relation = document.getElementById('new-relation').value;
+    if(!name){ return; }
+    const key = 'p' + Date.now();
+    const color = colors[profileOrder.length % colors.length];
+    const isMinor = relation === 'Child';
+    PROFILES[key] = {
+      name: name, first: name.split(' ')[0], relation: relation, initial: initials(name), color: color,
+      email: "(managed by Paul)",
+      access: {
+        isMinor: isMinor, ownerName: name,
+        delegates: [{ id:'paul', name:"Paul Demarco", initial:"P", color:'var(--brass)',
+          relation: isMinor ? "Parent / guardian" : "Invited by Paul" }],
+        viewers: []
+      },
+      subline: `No urgent items for ${name.split(' ')[0]} right now.`,
+      updates: [{ icon:'doc', color:'teal', title:"Profile created", sub:"Add documents to get started" }],
+      frequent: { title:"No documents yet", status:"expiring", meta:"Add the first one" },
+      documents: [],
+      notifications: [{ p:'low', title:"Profile created", sub:`You're now managing ${name.split(' ')[0]}'s account` }]
+    };
+    profileOrder.push(key);
+    closeModal();
+    switchProfile(key);
+    go('home');
+  }
+
+  // ---------- Access & Sharing drawer ----------
+  let accessKey = null;
+
+  function openAccess(key){
+    accessKey = key;
+    document.getElementById('drawer-backdrop').classList.add('open');
+    document.getElementById('access-drawer').classList.add('open');
+    renderAccessScreen();
+    closeSidebar();
+  }
+  function closeAccess(){
+    document.getElementById('drawer-backdrop').classList.remove('open');
+    document.getElementById('access-drawer').classList.remove('open');
+  }
+
+  function renderAccessScreen(){
+    const p = PROFILES[accessKey];
+    const a = p.access;
+    document.getElementById('access-title').textContent = accessKey === 'paul' ? "Paul's account" : `${p.first}'s account`;
+
+    document.getElementById('access-owner').innerHTML = `
+      <div class="owner-card">
+        <div class="ring" style="background:${p.color};">${p.initial}</div>
+        <div>
+          <div class="oname">${a.ownerName}</div>
+          <div class="orole">${a.isMinor ? 'Account holder (minor)' : 'Owner'}</div>
+        </div>
+      </div>`;
+
+    const bannerSlot = document.getElementById('access-guardian-banner');
+    bannerSlot.innerHTML = a.isMinor ? `
+      <div class="guardian-banner">
+        <strong>Paul is the acting owner</strong> while ${p.first} is a minor. He can manage documents and alerts on her behalf.
+        When ${p.first} turns 18, ownership can be transferred to her directly.
+        <div><button class="transfer-btn" onclick="openTransferModal()">Transfer ownership to ${p.first}</button></div>
+      </div>` : '';
+
+    document.getElementById('access-delegates').innerHTML = a.delegates.length
+      ? a.delegates.map(d => `
+        <div class="access-row">
+          <div class="ring" style="background:${d.color};">${d.initial}</div>
+          <div><div class="aname">${d.name}</div><div class="arole">${d.relation}</div></div>
+          <button class="revoke-btn" onclick="revokePerson('delegates','${d.id}')">Revoke</button>
+        </div>`).join('')
+      : `<div class="empty-access">No one else can manage this account yet.</div>`;
+
+    document.getElementById('access-viewers').innerHTML = a.viewers.length
+      ? a.viewers.map(v => `
+        <div class="access-row">
+          <div class="ring" style="background:${v.color};">${v.initial}</div>
+          <div><div class="aname">${v.name}</div><div class="arole">${v.relation}</div></div>
+          <button class="revoke-btn" onclick="revokePerson('viewers','${v.id}')">Revoke</button>
+        </div>`).join('')
+      : `<div class="empty-access">No one has view-only access.</div>`;
+
+    let note;
+    if(accessKey === 'paul'){
+      note = "Paul's account is private by default. Nothing is shared until he invites someone, and any invite can be revoked at any time.";
+    } else if(a.isMinor){
+      note = `${p.first} cannot yet change who has access. Once ownership is transferred to her, she alone decides who to invite or remove.`;
+    } else {
+      note = `${a.ownerName} owns this account and can revoke anyone's access at any time — including Paul's. No one else can remove ${a.ownerName.split(' ')[0]}'s access to their own account.`;
+    }
+    document.getElementById('access-privacy-note').textContent = note;
+  }
+
+  function revokePerson(role, id){
+    const a = PROFILES[accessKey].access;
+    a[role] = a[role].filter(person => person.id !== id);
+    renderAccessScreen();
+  }
+
+  function openInviteModal(){
+    const p = PROFILES[accessKey];
+    document.getElementById('invite-sub').textContent =
+      accessKey === 'paul' ? "Give someone access to Paul's account." : `Give someone access to ${p.first}'s account.`;
+    document.getElementById('invite-overlay').classList.add('open');
+  }
+  function closeInviteModal(){
+    document.getElementById('invite-overlay').classList.remove('open');
+    document.getElementById('invite-name').value = '';
+  }
+  function saveInvite(){
+    const name = document.getElementById('invite-name').value.trim();
+    const roleValue = document.getElementById('invite-role').value;
+    if(!name){ return; }
+    const person = {
+      id: 'g' + Date.now(), name: name, initial: initials(name),
+      color: colors[Math.floor(Math.random()*colors.length)],
+      relation: roleValue === 'delegate' ? "Invited as delegate" : "Invited as viewer"
+    };
+    const a = PROFILES[accessKey].access;
+    if(roleValue === 'delegate'){ a.delegates.push(person); } else { a.viewers.push(person); }
+    closeInviteModal();
+    renderAccessScreen();
+  }
+
+  function openTransferModal(){
+    const p = PROFILES[accessKey];
+    document.getElementById('transfer-sub').textContent = `${p.first} will become the sole owner of her own account.`;
+    document.getElementById('transfer-overlay').classList.add('open');
+  }
+  function closeTransferModal(){ document.getElementById('transfer-overlay').classList.remove('open'); }
+  function confirmTransfer(){
+    const p = PROFILES[accessKey];
+    p.access.isMinor = false;
+    p.access.delegates = [];
+    p.access.viewers = [];
+    p.relation = "You (transferred)";
+    closeTransferModal();
+    renderAccessScreen();
+  }
+
+  render();
+</script>
+</body>
+</html>
